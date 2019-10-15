@@ -47,6 +47,14 @@ var magenta = color.New(color.FgMagenta)
 var cyan = color.New(color.FgCyan)
 
 func main() {
+	if len(os.Args) > 1 {
+		if os.Args[1] == "-h" || os.Args[1] == "-help" || os.Args[1] == "--help" {
+			fmt.Println("systemd-auto-config is a program which allows you to create service configurations for the systemd using a number of presets interactively\nLicensed under the MIT license, created by Sidharth Soni (Sid Sun) <sid@sidsun.com>\nYou can find the source code at: https://github.com/Sid-Sun/systemd-auto-config")
+		} else {
+			fmt.Printf("Unknown option(s) %s, run with -h, -help or --help to get help or without any argumets to launch the program\n", os.Args[1])
+		}
+		return
+	}
 	TestWritePermissions()
 	color.Magenta("-------------------------------------------------------------------------------")
 	fmt.Println("An interactive program to Automate systemd services creation by Sid Sun.")
