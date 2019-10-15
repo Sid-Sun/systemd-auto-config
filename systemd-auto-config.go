@@ -43,8 +43,18 @@ type service struct {
 	}
 }
 
+var magenta = color.New(color.FgMagenta)
+var cyan = color.New(color.FgCyan)
+
 func main() {
 	TestWritePermissions()
+	color.Magenta("-------------------------------------------------------------------------------")
+	fmt.Println("An interactive program to Automate systemd services creation by Sid Sun.")
+	fmt.Println("Licensed under the MIT License.")
+	fmt.Println("By using this program, you agree to abide by the MIT License.")
+	fmt.Println("Copyright (c) 2019 Sidharth Soni (Sid Sun) <sid@sidsun.com>.")
+	color.Magenta("-------------------------------------------------------------------------------")
+	color.Blue("Let's  get started!\n\n")
 	input := TakeInput()
 	if input == 4 {
 		return
@@ -58,54 +68,70 @@ func main() {
 	case 3:
 		Service.core.kind = "oneshot"
 	}
-	fmt.Println("Please enter the service name.")
+	_, _ = cyan.Print("\nService Name: ")
 	Service.name = GetString(false, true)
 	//Unit section begins
-	fmt.Println("Please enter the service description.")
+	_, _ = cyan.Print("Service Description: ")
 	Service.unit.description = GetString(false, false)
 	fmt.Println("Please enter the services your service should start after (empty for none)")
+	_, _ = cyan.Print("After: ")
 	Service.unit.after = GetString(true, false)
 	fmt.Println("Please enter the hard dependencies for your service (empty for none)")
+	_, _ = cyan.Print("Requires: ")
 	Service.unit.requires = GetString(true, false)
 	fmt.Println("Please enter the soft dependencies for your service (empty for none)")
+	_, _ = cyan.Print("Wants: ")
 	Service.unit.wants = GetString(true, false)
 	//Unit section ends
 	//Service section begins
 	fmt.Println("Please enter the user the service should as (empty to not specify default: root)")
+	_, _ = cyan.Print("User: ")
 	Service.core.user = GetString(true, true)
 	fmt.Println("Please enter the group the service should as (empty to not specify)")
+	_, _ = cyan.Print("Group: ")
 	Service.core.group = GetString(true, true)
 	fmt.Println("Please enter the working directory for the service (empty to not specify)")
+	_, _ = cyan.Print("Working Directory: ")
 	Service.core.workingDirectory = GetString(true, true)
 	fmt.Println("Please specify the environment variables (empty to not specify)")
 	fmt.Println("Example: \"TOKEN=XXX ID=YYY\" without double quotes and with space between variables only")
+	_, _ = cyan.Print("Environment: ")
 	Service.core.environment = strings.Fields(GetString(true, false))
 	fmt.Println("Please enter the start command")
+	_, _ = cyan.Print("ExecStart: ")
 	Service.core.start.start = GetString(false, false)
 	fmt.Println("Please enter the pre-start command (empty for none)")
+	_, _ = cyan.Print("ExecStartPre: ")
 	Service.core.start.pre = GetString(true, false)
 	fmt.Println("Please enter the post-start command (empty for none)")
+	_, _ = cyan.Print("ExecStartPost: ")
 	Service.core.start.post = GetString(true, false)
 	switch input {
 	case 3:
-		fmt.Println("Do you want the service to remain after the start command has finished executing? (yes/no)")
+		fmt.Println("Do you want the service to remain after the start command has finished executing?")
+		_, _ = cyan.Print("Remain After Exit (yes/no): ")
 		answer := GetString(false, true)
 		if strings.ToLower(answer) == "yes" {
 			Service.core.remainAfterExit = true
 		}
 	default:
 		fmt.Println("Please enter the reload command (empty for none)")
+		_, _ = cyan.Print("ExecReload: ")
 		Service.core.reload = GetString(true, false)
 		fmt.Println("Please enter the stop command (empty for none)")
+		_, _ = cyan.Print("ExecStop: ")
 		Service.core.stop.stop = GetString(true, false)
 		fmt.Println("Please enter the post-stop command (empty for none)")
+		_, _ = cyan.Print("ExecStopPost: ")
 		Service.core.stop.post = GetString(true, false)
 	}
 	//Service section ends
 	//Install section begins
 	fmt.Println("Please enter any aliases for your service (empty for none)")
+	_, _ = cyan.Print("Alias: ")
 	Service.install.alias = GetString(true, false)
-	fmt.Println("Do you want the service to be able to start at boot? (yes/no)")
+	fmt.Println("Do you want the service to be able to start at boot?")
+	_, _ = cyan.Print("Auto Start (yes/no): ")
 	answer := GetString(false, true)
 	if strings.ToLower(answer) == "yes" {
 		Service.install.autoStart = true
@@ -113,8 +139,13 @@ func main() {
 	//Install section ends
 	//We all love to write :D
 	FileContents := PrepareServiceFileContents(Service)
-	FileName := CreateConfigFile(Service.name)
-	WriteContentToFile(FileName, FileContents)
+	fmt.Print(FileContents)
+	_, _ = cyan.Print("Is this correct? (yes/no): ")
+	answer = GetString(false, true)
+	if strings.ToLower(answer) == "yes" {
+		FileName := CreateConfigFile(Service.name)
+		WriteContentToFile(FileName, FileContents)
+	}
 }
 
 func PrepareServiceFileContents(service service) string {
@@ -184,8 +215,9 @@ func PrepareServiceFileContents(service service) string {
 
 func TakeInput() uint {
 	var input int
-	fmt.Println("Which type of service do you want to create?")
+	_, _ = magenta.Print("Options: ")
 	fmt.Println("\n(1) Simple - A single command is executed and is considered to be the main process/service\n(2) Forking - A Service which expects the main process/service to fork and launch a child process\n(3) Oneshot - A Service which is expected to start and finish its job before other units are launched\n(4) Exit")
+	_, _ = cyan.Print("Which type of service do you want to create: ")
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 	scannedText := scanner.Text()
